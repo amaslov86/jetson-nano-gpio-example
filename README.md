@@ -25,7 +25,7 @@ Tactile Switch : 1EA<br>
 Breadboard : 1EA<br>
 and some jumper wires(female to male)<br>
 
-<img src=./data/https://github.com/valentis/jetson-gpio-example/blob/master/circuit.png>
+<img src=https://github.com/valentis/jetson-gpio-example/blob/master/data/circuit.png>
 
 NVIDIA Jetson Nano J41 Header Pinout
 * https://www.jetsonhacks.com/nvidia-jetson-nano-j41-header-pinout/
