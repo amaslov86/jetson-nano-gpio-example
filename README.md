@@ -29,3 +29,8 @@ and some jumper wires(female to male)<br>
 
 NVIDIA Jetson Nano J41 Header Pinout
 * https://www.jetsonhacks.com/nvidia-jetson-nano-j41-header-pinout/
+
+Reference 
+* https://github.com/leahneukirchen/linux-jetson-tk1/blob/master/drivers/gpio/gpio-tegra.c
+* https://github.com/brgl/libgpiod/tree/master/tools
+* https://elinux.org/RPi_GPIO_Code_Samples
