@@ -14,3 +14,15 @@ Assuming that the defined addresses for GPIO in your program are correct, here's
 
 This compiles and runs, and doesn't crash the kernel, but I didn't hook up a scope to see whether it did anything to any GPIOs.
 Also, the pinmux/device-tree configuration caveats still apply; i e just because can can toggle a GPIO pin device, doesn't mean that that GPIO pin device is necessarily visible on the output pin you think it should be ...
+
+
+This example use a Tactile Switch & LED,
+You may need some electronic components like this.
+
+Resister : 2EA(10KΩ, 220Ω)
+LED : 1EA
+Tactile Switch : 1EA
+Breadboard : 1EA
+and some jumper wires(female to male)
+
+<img src=https://github.com/valentis/jetson-gpio-example/blob/master/circuit.png>
