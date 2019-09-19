@@ -36,41 +36,40 @@ int main(int argc, char** argv)
     }
 
     //  set up a pointer for convenient access -- this pointer is to the selected GPIO controller
-    GPIO_mem volatile *pinLed = (GPIO_mem volatile *)((char *)base + (GPIO_16 & pagemask));
-    GPIO_mem volatile *pinSwt = (GPIO_mem volatile *)((char *)base + (GPIO_77 & pagemask));
+    gpio_t volatile *pinLed = (gpio_t volatile *)((char *)base + (GPIO_16 & pagemask));
+    gpio_t volatile *pinSwt = (gpio_t volatile *)((char *)base + (GPIO_77 & pagemask));
 
     // for LED : GPIO OUT 
-    pinLed->CNF[0] = 0x00FF;
-    pinLed->OE[0] = OUTPUT;
-//  pinLed->OUT[0] = 0xFF;
-//  pinLed->IN = 0x00; read only
+    pinLed->CNF = 0x00FF;
+    pinLed->OE = OUTPUT;
+//  pinLed->OUT = 0xFF;
     
     // for Switch : GPIO IN 
-    pinSwt->CNF[0] = 0x00FF;
-    pinSwt->OE[0] = INPUT;
-    pinSwt->IN[0] = 0x00; 		// initial value
+    pinSwt->CNF = 0x00FF;
+    pinSwt->OE = INPUT;
+    pinSwt->IN = 0x00; 			// initial value
     
     //  disable interrupts
-    pinLed->INT_ENB[0] = 0x00;
-    pinSwt->INT_ENB[0] = 0x00;
+    pinLed->INT_ENB = 0x00;
+    pinSwt->INT_ENB = 0x00;
 
     // parameter for Input
-    pinSwt->INT_STA[0] = 0xFF;		// for Active_low
-    pinSwt->INT_LVL[0] = GPIO_INT_LVL_EDGE_BOTH;
-    pinSwt->INT_CLR[0] = 0xffffff;
+    pinSwt->INT_STA = 0xFF;		// for Active_low
+    pinSwt->INT_LVL = GPIO_INT_LVL_EDGE_BOTH;
+    pinSwt->INT_CLR = 0xffffff;
 
     // turn led light with switch 
     printf("checkout : \"$ sudo cat /sys/kernel/debug/tegra_gpio\"\n");
     for(uint8_t cnt = 0; cnt < 100; cnt++) {
-        //printf("[%d] %x\n", cnt, pinSwt->IN[0]>>5);		// for debug message
-        printf((pinSwt->IN[0]>>5)?"x":"o");
-        pinLed->OUT[0] = (pinSwt->IN[0]>>5)?0:0xff;
+        //printf("[%d] %x\n", cnt, pinSwt->IN>>5);		// for debug message
+        printf((pinSwt->IN>>5)?"x":"o");
+        pinLed->OUT = (pinSwt->IN>>5)?0:0xff;
 	fflush(stdout);
-        usleep(50*1000);
+        usleep(50*1000);		// wait 50 milisec
     }
 
     /* turn off the LED */
-    pinLed->OUT[0] = 0;
+    pinLed->OUT = 0;
 
     /* unmap */
     munmap(base, pagesize);

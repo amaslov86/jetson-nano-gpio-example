@@ -41,28 +41,27 @@ int main(int argc, char** argv)
     }
 
     //  set up a pointer for convenient access -- this pointer is to the selected GPIO controller
-    GPIO_mem volatile *pinTrigger = (GPIO_mem volatile *)((char *)base + (GPIO_16 & pagemask));
-    GPIO_mem volatile *pinEcho = (GPIO_mem volatile *)((char *)base + (GPIO_77 & pagemask));
+    gpio_t volatile *pinTrigger = (gpio_t volatile *)((char *)base + (GPIO_16 & pagemask));
+    gpio_t volatile *pinEcho = (gpio_t volatile *)((char *)base + (GPIO_77 & pagemask));
 
     // for Trigger : GPIO OUT 
-    pinTrigger->CNF[0] = 0x00FF;
-    pinTrigger->OE[0] = OUTPUT;
-//  pinTrigger->OUT[0] = 0xFF;
-//  pinTrigger->IN = 0x00; read only
+    pinTrigger->CNF = 0x00FF;
+    pinTrigger->OE = OUTPUT;
+//  pinTrigger->OUT = 0xFF;
     
     // for Echo : GPIO IN 
-    pinEcho->CNF[0] = 0x00FF;
-    pinEcho->OE[0] = INPUT;
-    pinEcho->IN[0] = 0x00; 		// initial value
+    pinEcho->CNF = 0x00FF;
+    pinEcho->OE = INPUT;
+    pinEcho->IN = 0x00; 		// initial value
     
     //  disable interrupts
-    pinTrigger->INT_ENB[0] = 0x00;
-    pinEcho->INT_ENB[0] = 0x00;
+    pinTrigger->INT_ENB = 0x00;
+    pinEcho->INT_ENB = 0x00;
 
     // parameter for Input
-    pinEcho->INT_STA[0] = 0xFF;		// for Active_low
-    pinEcho->INT_LVL[0] = GPIO_INT_LVL_EDGE_BOTH;
-    pinEcho->INT_CLR[0] = 0xffffff;
+    pinEcho->INT_STA = 0xFF;		// for Active_low
+    pinEcho->INT_LVL = GPIO_INT_LVL_EDGE_BOTH;
+    pinEcho->INT_CLR = 0xffffff;
 
     printf("checkout : \"$ sudo cat /sys/kernel/debug/tegra_gpio\"\n");
 
@@ -72,16 +71,16 @@ int main(int argc, char** argv)
 
     for(uint8_t cnt = 0; cnt < 10; cnt++) {
         // Trigger ultrasonic sensor 
-        pinTrigger->OUT[0] = 0xFF;		// HIGH
+        pinTrigger->OUT = 0xFF;		// HIGH
         usleep(10);
-        pinTrigger->OUT[0] = 0x00;		// LOW
+        pinTrigger->OUT = 0x00;		// LOW
 
         lowHigh = highLow = echo = prevEcho = 0;
 
 	// receive echo & calculate distance
         while(0 == lowHigh || 0 == highLow) {
             prevEcho = echo;
-            echo = pinEcho->IN[0]>>5;
+            echo = pinEcho->IN>>5;
             if(0 == lowHigh && 0 == prevEcho && 1 == echo) {
                 lowHigh = 1;
                 startTime = getMicrotime();
@@ -95,7 +94,7 @@ int main(int argc, char** argv)
         interval = stopTime - startTime;
         distanceCm = interval / 58;
         printf("distance: %.2f cm\n", distanceCm);
-	usleep(1000*1000);
+	usleep(1000*1000);		// wait 1 sec
     }
 
     /* unmap */

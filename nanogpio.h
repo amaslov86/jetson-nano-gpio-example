@@ -56,15 +56,23 @@ enum INOUT {
 //  register is interleaved for the four ports, so
 //  REGX: port0, port1, port2, port3
 //  REGY: port0, port1, port2, port3
-struct GPIO_mem {
-    uint32_t CNF[4];
-    uint32_t OE[4];
-    uint32_t OUT[4];
-    uint32_t IN[4];
-    uint32_t INT_STA[4];
-    uint32_t INT_ENB[4];
-    uint32_t INT_LVL[4];
-    uint32_t INT_CLR[4];
-};
+typedef struct {
+    uint32_t CNF;
+    uint32_t _padding1[3];
+    uint32_t OE;
+    uint32_t _padding2[3];
+    uint32_t OUT;
+    uint32_t _padding3[3];
+    uint32_t IN;
+    uint32_t _padding4[3];
+    uint32_t INT_STA;
+    uint32_t _padding5[3];
+    uint32_t INT_ENB;
+    uint32_t _padding6[3];
+    uint32_t INT_LVL;
+    uint32_t _padding7[3];
+    uint32_t INT_CLR;
+    uint32_t _padding8[3];
+} gpio_t;
 
 #endif                  /* __NANO_GPIO_H__ */
