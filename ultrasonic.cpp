@@ -10,7 +10,7 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
-#include "nanogpio.h"
+#include "gpionano.h"
 
 static int64_t getMicrotime()
 {

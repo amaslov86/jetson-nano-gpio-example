@@ -13,7 +13,7 @@
 #include <sys/fcntl.h>
 #include <sys/mman.h>
 
-#include "nanogpio.h"
+#include "gpionano.h"
 
 int main(int argc, char** argv)
 {
