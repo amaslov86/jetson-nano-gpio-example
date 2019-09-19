@@ -1,16 +1,14 @@
 //
-// Simple GPIO memory-mapped example by Snarky (github.com/jwatte)
+// Simple GPIO memory-mapped example by YoungJin Suh (http://valentis.pe.kr / valentis@chollian.net)
+//                           originally from Snarky (github.com/jwatte)
 // build with:
 //  g++ -O1 -g -o mem gpiomem.cpp -Wall -std=gnu++17
 // run with:
 //  sudo ./mem
 //
-//
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>			
+#include <stdlib.h>			// for exit()
 #include <stdint.h>
-#include <errno.h>
 #include <unistd.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
@@ -36,14 +34,24 @@
  */
 
 //  The only address we really need
-#define GPIO_1     0x6000d000
-#define GPIO_2     0x6000d100
-#define GPIO_3     0x6000d200
-#define GPIO_4     0x6000d300
-#define GPIO_5     0x6000d400
-#define GPIO_6     0x6000d500
-#define GPIO_7     0x6000d600
-#define GPIO_8     0x6000d700
+#define GPIO_216      0x6000d60C    // Jetson Nano  7[AUDIO_MCLK]
+#define GPIO_50       0x6000d108    // Jetson Nano 11[UART2_RTS]
+#define GPIO_194      0x6000d600    // Jetson Nano 15[LCD_TE]
+#define GPIO_16       0x6000d008    // Jetson Nano 19[SPI1_MOSI]
+#define GPIO_38       0x6000d100    // Jetson Nano 33[GPIO_PE6]
+#define GPIO_77       0x6000d204    // Jetson Nano 38[I2S4_SDIN] // J
+
+// From https://github.com/leahneukirchen/linux-jetson-tk1/blob/master/drivers/gpio/gpio-tegra.c
+#define GPIO_INT_LVL_MASK		0x010101
+#define GPIO_INT_LVL_EDGE_RISING	0x000101
+#define GPIO_INT_LVL_EDGE_FALLING	0x000100
+#define GPIO_INT_LVL_EDGE_BOTH		0x010100
+#define GPIO_INT_LVL_LEVEL_HIGH		0x000001
+#define GPIO_INT_LVL_LEVEL_LOW		0x000000
+
+enum INOUT { 
+    INPUT, OUTPUT
+};
 
 //  layout based on the definitions above
 //  Each GPIO controller has four ports, each port controls 8 pins, each
@@ -61,49 +69,70 @@ struct GPIO_mem {
     uint32_t INT_CLR[4];
 };
 
-int main(void)
+int main(int argc, char** argv)
 {
     //  read physical memory (needs root)
     int fd = open("/dev/mem", O_RDWR | O_SYNC);
     if (fd < 0) {
-        perror("/dev/mem");
-        fprintf(stderr, "please run this program as root (for example with sudo)\n");
+        fprintf(stderr, "usage : $ sudo %s (with root privilege)\n", argv[0]);
         exit(1);
     }
 
     //  map a particular physical address into our address space
     int pagesize = getpagesize();
     int pagemask = pagesize-1;
+
     //  This page will actually contain all the GPIO controllers, because they are co-located
-    void *base = mmap(0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (GPIO_2 & ~pagemask));
+    void *base = mmap(0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, ((GPIO_16 | GPIO_77) & ~pagemask));
     if (base == NULL) {
         perror("mmap()");
         exit(1);
     }
 
     //  set up a pointer for convenient access -- this pointer is to the selected GPIO controller
-    GPIO_mem volatile *pin = (GPIO_mem volatile *)((char *)base + (GPIO_2 & pagemask));
+    GPIO_mem volatile *pinLed = (GPIO_mem volatile *)((char *)base + (GPIO_16 & pagemask));
+    GPIO_mem volatile *pinSwt = (GPIO_mem volatile *)((char *)base + (GPIO_77 & pagemask));
 
-    pin->CNF[0] = 0x00ff;
-    pin->OE[0] = 0xff;
-    pin->OUT[0] = 0xff;
-    //  pin->IN = 0x00; read only
+    // for LED : GPIO OUT 
+    pinLed->CNF[0] = 0x00FF;
+    pinLed->OE[0] = OUTPUT;
+//  pinLed->OUT[0] = 0xFF;
+//  pinLed->IN = 0x00; read only
+    
+    // for Switch : GPIO IN 
+    pinSwt->CNF[0] = 0x00FF;
+    pinSwt->OE[0] = INPUT;
+    pinSwt->IN[0] = 0x00; 		// initial value
+    
     //  disable interrupts
-    pin->INT_ENB[0] = 0x00;
-    //  don't worry about these for now
-    //pin->INT_STA[0] = 0x00;
-    //pin->INT_LVL[0] = 0x000000;
-    //pin->INT_CLR[0] = 0xffffff;
+    pinLed->INT_ENB[0] = 0x00;
+    pinSwt->INT_ENB[0] = 0x00;
 
-    fprintf(stderr, "press ctrl-C to stop\n");
+    // parameter for Input
+    pinSwt->INT_STA[0] = 0xFF;		// for Active_low
+    pinSwt->INT_LVL[0] = GPIO_INT_LVL_EDGE_BOTH;
+    pinSwt->INT_CLR[0] = 0xffffff;
 
-    //  "blink" the output values
-    uint8_t val = 0xff;
-    while (true) {
-        sleep(1);
-        val = val ^ 0xff;
-        pin->OUT[0] = val;
+    // turn led light with switch 
+    printf("checkout : \"$ sudo cat /sys/kernel/debug/tegra_gpio\"\n");
+    for(uint8_t cnt = 0; cnt < 100; cnt++) {
+        //printf("[%d] %x\n", cnt, pinSwt->IN[0]>>5);		// for debug message
+        printf((pinSwt->IN[0]>>5)?"x":"o");
+        pinLed->OUT[0] = (pinSwt->IN[0]>>5)?0:0xff;
+	fflush(stdout);
+        usleep(50*1000);
     }
 
-    return 0 ;
+    /* turn off the LED */
+    pinLed->OUT[0] = 0;
+
+    /* unmap */
+    munmap(base, pagesize);
+
+    /* close the /dev/mem */
+    close(fd);
+
+    printf("\nGood Bye!!!\n");
+    
+    return 0;
 }
