@@ -41,8 +41,6 @@
 #define GPIO_38       0x6000d100    // Jetson Nano 33[GPIO_PE6]
 #define GPIO_77       0x6000d204    // Jetson Nano 38[I2S4_SDIN] // J
 
-#define GPIO_12       0x6000d00C    // Jetson Nano 37[SPI2_MOSI]
-
 // From https://github.com/leahneukirchen/linux-jetson-tk1/blob/master/drivers/gpio/gpio-tegra.c
 #define GPIO_INT_LVL_MASK		0x010101
 #define GPIO_INT_LVL_EDGE_RISING	0x000101
