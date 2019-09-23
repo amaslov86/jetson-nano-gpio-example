@@ -29,14 +29,14 @@ int main(int argc, char** argv)
     int pagemask = pagesize-1;
 
     //  This page will actually contain all the GPIO controllers, because they are co-located
-    void *base = mmap(0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (GPIO_38 & ~pagemask));
+    void *base = mmap(0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (GPIO_12 & ~pagemask));
     if (base == NULL) {
         perror("mmap()");
         exit(1);
     }
 
     //  set up a pointer for convenient access -- this pointer is to the selected GPIO controller
-    gpio_t volatile *pinLed = (gpio_t volatile *)((char *)base + (GPIO_38 & pagemask));
+    gpio_t volatile *pinLed = (gpio_t volatile *)((char *)base + (GPIO_12 & pagemask));
 
     // for LED : GPIO OUT 
     pinLed->CNF = 0x00FF;

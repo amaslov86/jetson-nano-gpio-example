@@ -5,9 +5,10 @@
 // Simple GPIO memory-mapped example by YoungJin Suh (http://valentis.pe.kr / valentis@chollian.net)
 //                           originally from Snarky (github.com/jwatte)
 // build with:
-//  g++ -O1 -g -o mem gpiomem.cpp -Wall -std=gnu++17
+//  $ g++ -O1 -g -o sample sample.cpp -Wall -std=gnu++17
+//
 // run with:
-//  sudo ./mem
+//  $ sudo ./sample
 //
 #include <stdint.h>
 
@@ -35,9 +36,12 @@
 #define GPIO_216      0x6000d60C    // Jetson Nano  7[AUDIO_MCLK]
 #define GPIO_50       0x6000d108    // Jetson Nano 11[UART2_RTS]
 #define GPIO_194      0x6000d600    // Jetson Nano 15[LCD_TE]
+#define GPIO_14       0x6000d004    // Jetson Nano 13[SPI2_SCK]
 #define GPIO_16       0x6000d008    // Jetson Nano 19[SPI1_MOSI]
 #define GPIO_38       0x6000d100    // Jetson Nano 33[GPIO_PE6]
 #define GPIO_77       0x6000d204    // Jetson Nano 38[I2S4_SDIN] // J
+
+#define GPIO_12       0x6000d00C    // Jetson Nano 37[SPI2_MOSI]
 
 // From https://github.com/leahneukirchen/linux-jetson-tk1/blob/master/drivers/gpio/gpio-tegra.c
 #define GPIO_INT_LVL_MASK		0x010101
