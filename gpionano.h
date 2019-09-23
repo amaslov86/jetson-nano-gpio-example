@@ -48,7 +48,7 @@
 #define GPIO_INT_LVL_LEVEL_LOW		0x000000
 
 enum INOUT { 
-    INPUT, OUTPUT
+    INPUT, OUTPUT=0xFF
 };
 
 //  layout based on the definitions above

@@ -2,9 +2,9 @@
 // Simple GPIO memory-mapped example by YoungJin Suh (http://valentis.pe.kr / valentis@chollian.net)
 //                           originally from Snarky (github.com/jwatte)
 // build with:
-//  g++ -O1 -g -o mem gpiomem.cpp -Wall -std=gnu++17
+//  g++ -O1 -g -o switch switch.cpp -Wall -std=gnu++17
 // run with:
-//  sudo ./mem
+//  sudo ./switch
 //
 
 #include <stdio.h>
@@ -29,14 +29,14 @@ int main(int argc, char** argv)
     int pagemask = pagesize-1;
 
     //  This page will actually contain all the GPIO controllers, because they are co-located
-    void *base = mmap(0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, ((GPIO_16 | GPIO_77) & ~pagemask));
+    void *base = mmap(0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, ((GPIO_38 | GPIO_77) & ~pagemask));
     if (base == NULL) {
         perror("mmap()");
         exit(1);
     }
 
     //  set up a pointer for convenient access -- this pointer is to the selected GPIO controller
-    gpio_t volatile *pinLed = (gpio_t volatile *)((char *)base + (GPIO_16 & pagemask));
+    gpio_t volatile *pinLed = (gpio_t volatile *)((char *)base + (GPIO_38 & pagemask));
     gpio_t volatile *pinSwt = (gpio_t volatile *)((char *)base + (GPIO_77 & pagemask));
 
     // for LED : GPIO OUT 
